@@ -11,12 +11,16 @@ class QuotesSpider(scrapy.Spider):
 
     def parse(self, response):
         urls = response.xpath('//*[@id="threadlisttableid"]//a[@class="s xst"]/@href').extract()
+        next_url = response.xpath('//a[@class="nxt"]/@href').extract_first()
         #urls = response.xpath('/html/body/div[7]/div[4]/div/div/div[4]/div[2]/form/table/tbody[40]/tr/th/a[2]/@href').extract()
         for url in urls:
             url = response.urljoin(url)
             #print('url',url)
             #pass
             yield scrapy.Request(url, callback=self.imageparse)
+        if next_url is not None:
+            next_url = response.urljoin(next_url)
+            yield scrapy.Request(url=next_url, callback=self.parse)
 
     def imageparse(self, response):
         item = TutorialItem()
